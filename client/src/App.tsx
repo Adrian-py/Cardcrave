@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 
+interface DataInterface {
+  res?: "string";
+  test?: "string";
+}
+
 function App() {
-  const [data, setData] = useState("");
+  const [data, setData] = useState<DataInterface>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -10,9 +15,13 @@ function App() {
 
     fetchData()
       .then((data) => data.json())
-      .then((data) => console.log(data));
+      .then((data) => setData(data));
   }, []);
-  return <p className="font-bold">Testing</p>;
+  return (
+    <p className="font-bold">
+      {data.res} {data.test}
+    </p>
+  );
 }
 
 export default App;
