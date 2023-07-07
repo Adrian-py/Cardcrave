@@ -1,25 +1,23 @@
 import express from "express";
 import * as dotenv from "dotenv";
 import cors from "cors";
+import bodyParser from "body-parser";
 
 import { ConnectDatabase } from "./database/connect";
 
+// Routes
 const HomeRouter = require("./routes/App.routes");
-const UserModel = require("./models/User.model");
 
 dotenv.config();
 const PORT = process.env.PORT_NUMBER || 3000;
 
+// Middleware
 const app = express();
 app.use(cors());
+app.use(bodyParser.json());
 
+// Connect to Database
 ConnectDatabase();
-const newUser = new UserModel({
-  username: "adrian",
-  email: "adrianhar@gmail.com",
-});
-
-newUser.save();
 
 app.use("/", HomeRouter);
 

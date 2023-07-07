@@ -1,26 +1,23 @@
-import { useEffect, useState } from "react";
-
-interface DataInterface {
-  res?: "string";
-  test?: "string";
-}
+import Navbar from "./components/Navbar";
+import CollectionsList from "./components/CollectionsList";
 
 function App() {
-  const [data, setData] = useState<DataInterface>({});
-
-  useEffect(() => {
-    const fetchData = async () => {
-      return await fetch("http://localhost:5000/api");
-    };
-
-    fetchData()
-      .then((data) => data.json())
-      .then((data) => setData(data));
-  }, []);
   return (
-    <p className="font-bold">
-      {data.res} {data.test}
-    </p>
+    <section className="w-full h-[100vh] bg-surface">
+      <Navbar />
+      <main className="text-on-surface px-[4.167vw]">
+        <div className="mb-[1.875rem]">
+          <h2 className="mb-[0.5rem] font-bold text-[1.75rem]">
+            Flashcards Collections
+          </h2>
+          <p className="text-[1.25rem] text-on-surface-1">
+            A list of all flashcard collections you have made.
+          </p>
+        </div>
+
+        <CollectionsList />
+      </main>
+    </section>
   );
 }
 
