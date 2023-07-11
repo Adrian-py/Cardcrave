@@ -1,3 +1,7 @@
+// Libraries
+const jwt = require("jsonwebtoken");
+import bcrypt from "bcrypt";
+
 // Types
 import { Request, Response } from "express";
 
@@ -8,15 +12,15 @@ import * as EmailValidator from "email-validator";
 const UserModel = require("../models/User.model");
 
 const createUser = async (req: Request, res: Response) => {
-  console.log(req.body);
-
   const userData = {
     username: req.body.username,
     email: req.body.email,
     password: req.body.password,
   };
 
-  // Validate data
+  /*
+    Validate Data
+  */
   // Check username length
   if (userData.username.length > 10 || userData.username.length < 5)
     return res
@@ -28,22 +32,67 @@ const createUser = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "Email invalid!" });
 
   // Check password length
-  if (userData.password.length > 16 || userData.password.length < 8) {
+  if (userData.password.length > 16 || userData.password.length < 8)
     return res
       .status(400)
       .json({ message: "Password length must be between 8 to 16 letters." });
-  }
+
   //Check password characters
   if (!/[A-Za-z]+/.test(userData.password) || !/[0-9]+/.test(userData.password))
     return res.status(400).json({
       message: "Password must contain atleast one character and digit",
     });
 
-  // Save to mongodb database
+  /*
+    Save to mongodb database
+  */
   const newUser = new UserModel(userData);
-  newUser.save();
-
-  return res.status(200).json({ message: "success" });
+  await newUser
+    .save()
+    .then(() => {
+      return res.status(200).json({ message: "success" }).redirect("/login");
+    })
+    .catch((err: any) => {
+      if (err.code === 11000) {
+        return res.status(400).json({
+          message: "Duplicate Key Error",
+        });
+      }
+    });
 };
 
-export { createUser };
+const loginUser = async (req: Request, res: Response) => {
+  const userData = {
+    username: req.body.username,
+    email: req.body.email,
+  };
+  const existingUser = await UserModel.findOne({
+    username: userData.username,
+    email: userData.email,
+  }).exec();
+
+  /*
+    Check if user is found
+  */
+  if (!existingUser)
+    return res.status(400).json({ message: "User not found!" });
+
+  /*
+    Check if password is valid
+  */
+  bcrypt.compare(req.body.password, existingUser.password, (err, result) => {
+    if (err) throw err;
+
+    if (result) {
+      const token = jwt.sign(
+        { username: existingUser.username },
+        process.env.PRIVATE_KEY
+      );
+
+      return res.status(200).json({ message: "Login Success", token: token });
+    }
+    return res.status(400).json({ message: "Wrong credentials!" });
+  });
+};
+
+export { createUser, loginUser };

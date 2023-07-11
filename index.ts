@@ -7,6 +7,7 @@ import { ConnectDatabase } from "./database/connect";
 
 // Routes
 const HomeRouter = require("./routes/App.routes");
+const AuthRouter = require("./routes/Auth.routes");
 
 dotenv.config();
 const PORT = process.env.PORT_NUMBER || 3000;
@@ -20,6 +21,7 @@ app.use(bodyParser.json());
 ConnectDatabase();
 
 app.use("/", HomeRouter);
+app.use("/auth/", AuthRouter);
 
 app.listen(PORT, () => {
   console.log(`Listening to PORT: ${PORT}`);
